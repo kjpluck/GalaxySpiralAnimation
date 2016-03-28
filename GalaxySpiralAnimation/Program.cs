@@ -20,10 +20,11 @@ namespace GalaxySpiralAnimation
         public int Width { get; } = 1920;
         public int Height { get; } = 1080;
         public int Fps { get; } = 30;
-        public double Duration { get; } = 10;
+        public double Duration { get; } = 40;
 
-        private const int StarSpacing = 35;
+        private const int StarSpacing = 20;
         private const float Tau = (float) (2*Math.PI);
+        private const int MinR = 100;
         private readonly int _halfHeight;
         private readonly int _halfWidth;
 
@@ -40,9 +41,16 @@ namespace GalaxySpiralAnimation
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 
-            for (int r = 100; r < _halfHeight; r+=StarSpacing)
+            var scene01Time = CalcSceneTime(0, 10, t);
+            var scene02Time = CalcSceneTime(10, 10, t);
+            var scene03Time = CalcSceneTime(20, 10, t);
+            var scene04Time = CalcSceneTime(30, 10, t);
+            var size = (int) (_halfHeight*0.83);
+            var rangeR = size - MinR;
+
+            for (int r = MinR; r < size; r+=StarSpacing)
             {
-                var majorAxis = CalcMajorAxis(r,t);
+                var majorAxis = CalcMajorAxis(r,scene02Time);
 
                 float minorAxis = r;
                 var circumference = Tau*r;
@@ -51,9 +59,11 @@ namespace GalaxySpiralAnimation
                 var deltaTheta = Tau/starsPerOrbit;
                 var orbitalVelocity = 5*1/Math.Sqrt(r);
 
+                var foo =(double) (size - (r-MinR) - MinR)/rangeR;
+                var angle = foo*scene03Time*0.3;
+
                 for (double theta = 0; theta < Tau; theta+=deltaTheta)
                 {
-                    var angle = 20*t/r;
                     var thetaT = theta +t* orbitalVelocity;
                     // x' = a*cos(t)*cos(theta) - b*sin(t)*sin(theta)  
                     var x = (float) (majorAxis*Math.Cos(thetaT)*Math.Cos(angle) - minorAxis*Math.Sin(thetaT)*Math.Sin(angle));
@@ -64,11 +74,26 @@ namespace GalaxySpiralAnimation
                     x = x + _halfWidth;
                     y = y + _halfHeight;
 
-                    graphics.FillCircle(Brushes.White,x,y,10);
+                    graphics.FillCircle(Brushes.White,x,y,5);
                 }
             }
 
+            graphics.DrawString("@kevpluck", new Font("Arial", 16), new SolidBrush(Color.White), 1800f, 1050f);
             return bmp;
+        }
+
+        private static double CalcSceneTime(double start, double duration, double t)
+        {
+            var end = start + duration;
+            var sceneTime = 0d;
+
+            if (t >= start)
+            {
+                if (t < end) sceneTime = t - start;
+                if (t >= end) sceneTime = duration;
+            }
+
+            return sceneTime;
         }
 
         private float CalcMajorAxis(int r, double t)
