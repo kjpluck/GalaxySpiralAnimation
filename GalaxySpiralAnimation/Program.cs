@@ -22,7 +22,7 @@ namespace GalaxySpiralAnimation
         public int Fps { get; } = 30;
         public double Duration { get; } = 10;
 
-        private const int StarSpacing = 40;
+        private const int StarSpacing = 35;
         private const float Tau = (float) (2*Math.PI);
         private readonly int _halfHeight;
         private readonly int _halfWidth;
@@ -39,6 +39,7 @@ namespace GalaxySpiralAnimation
             var graphics = Graphics.FromImage(bmp);
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
+
             for (int r = 100; r < _halfHeight; r+=StarSpacing)
             {
                 var majorAxis = CalcMajorAxis(r,t);
@@ -52,9 +53,17 @@ namespace GalaxySpiralAnimation
 
                 for (double theta = 0; theta < Tau; theta+=deltaTheta)
                 {
+                    var angle = 20*t/r;
                     var thetaT = theta +t* orbitalVelocity;
-                    var x = (float) (majorAxis*Math.Cos(thetaT)) + _halfWidth;
-                    var y = (float) (minorAxis*Math.Sin(thetaT)) + _halfHeight;
+                    // x' = a*cos(t)*cos(theta) - b*sin(t)*sin(theta)  
+                    var x = (float) (majorAxis*Math.Cos(thetaT)*Math.Cos(angle) - minorAxis*Math.Sin(thetaT)*Math.Sin(angle));
+
+                    // y' = a*cos(t)*sin(theta) + b*sin(t)*cos(theta)
+                    var y = (float) (majorAxis*Math.Cos(thetaT)*Math.Sin(angle) + minorAxis*Math.Sin(thetaT)*Math.Cos(angle));
+
+                    x = x + _halfWidth;
+                    y = y + _halfHeight;
+
                     graphics.FillCircle(Brushes.White,x,y,10);
                 }
             }
@@ -66,7 +75,7 @@ namespace GalaxySpiralAnimation
         {
             var maxR = r*(16f/9f);
             var diffR = maxR - r;
-            return (float) (r + diffR*(t/Duration));
+            return (float) (r + diffR*(t/10));
         }
     }
 }
