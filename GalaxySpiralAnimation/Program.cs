@@ -84,23 +84,31 @@ namespace GalaxySpiralAnimation
 
         private static double CalcSceneTime(double start, double duration, double t)
         {
-            var end = start + duration;
-            var sceneTime = 0d;
+            if (t < start) return 0;
 
-            if (t >= start)
-            {
-                if (t < end) sceneTime = t - start;
-                if (t >= end) sceneTime = duration;
-            }
+            var sceneTime = 0d;
+            var end = start + duration;
+
+            if (t < end) sceneTime = t - start;
+            if (t >= end) sceneTime = duration;
 
             return sceneTime;
         }
 
-        private float CalcMajorAxis(int r, double t)
+        private static float CalcMajorAxis(int r, double t)
         {
+            var proportion = SCurve(t, 10);
             var maxR = r*(16f/9f);
             var diffR = maxR - r;
-            return (float) (r + diffR*(t/10));
+            return (float) (r + diffR*proportion);
+        }
+
+        private static double SCurve(double t, double range)
+        {
+            var proportion = 1 - (t/range);
+            var cosArg = proportion*Math.PI;
+            var cosValue = Math.Cos(cosArg);
+            return (1 + cosValue)/2;
         }
     }
 }
