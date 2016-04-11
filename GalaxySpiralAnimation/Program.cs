@@ -11,21 +11,21 @@ namespace GalaxySpiralAnimation
     {
         static void Main(string[] args)
         {
-            Vidja.Vidja.Generate(new GalaxySpiral());
+            Vidja.Vidja.Generate(new GalaxySpiral(),"spiralgalaxy.gif");
         }
     }
 
     internal class GalaxySpiral : IVidja
     {
 
-        public int Width { get; } = 1920;
-        public int Height { get; } = 1080;
-        public int Fps { get; } = 30;
+        public int Width { get; } = 960;
+        public int Height { get; } = 540;
+        public int Fps { get; } = 25;
         public double Duration { get; } = 60;
 
-        private const int StarSpacing = 15;
+        private const int StarSpacing = 7;
         private const float Tau = (float) (2*Math.PI);
-        private const int MinR = 100;
+        private const int MinR = 50;
         private readonly int _halfHeight;
         private readonly int _halfWidth;
         private double _t;
@@ -92,11 +92,11 @@ Sometimes lots of the orbits come quite close together where the spiral arms are
                     x = x + _halfWidth;
                     y = y + _halfHeight;
 
-                    _graphics.FillCircle(Brushes.White,x,y,3);
+                    _graphics.FillCircle(Brushes.White,x,y,2);
                 }
             }
 
-            _graphics.DrawString("@kevpluck", new Font("Arial", 16), new SolidBrush(Color.White), 1800f, 1050f);
+            _graphics.DrawString("@kevpluck", new Font("Arial", 16), new SolidBrush(Color.White), 850f, 20f);
             return bmp;
         }
 
@@ -129,7 +129,7 @@ Sometimes lots of the orbits come quite close together where the spiral arms are
             return (1 + cosValue)/2;
         }
 
-        private void FadeInOutText(int start, string text, int duration = 3, int fontsize = 35, int ypos = 0)
+        private void FadeInOutText(int start, string text, int duration = 3, int fontsize = 13, int ypos = 0)
         {
             if (NotNow(start, duration)) return;
 
@@ -143,7 +143,7 @@ Sometimes lots of the orbits come quite close together where the spiral arms are
             if (ypos != 0)
             {
                 var layoutSize = _graphics.MeasureString(text, font);
-                layoutRectangle.Y = ypos;
+                layoutRectangle.Y = ypos/2;
                 layoutRectangle.Height = (int)layoutSize.Height;
             }
             else
