@@ -11,7 +11,7 @@ namespace GalaxySpiralAnimation
     {
         static void Main(string[] args)
         {
-            Vidja.Vidja.Generate(new GalaxySpiral(),"spiralgalaxy.gif");
+            Vidja.Vidja.Generate(new GalaxySpiral(),"spiralgalaxy.gif",30);
         }
     }
 
@@ -21,7 +21,7 @@ namespace GalaxySpiralAnimation
         public int Width { get; } = 960;
         public int Height { get; } = 540;
         public int Fps { get; } = 25;
-        public double Duration { get; } = 60;
+        public double Duration { get; } = 30.96;
 
         private const int StarSpacing = 7;
         private const float Tau = (float) (2*Math.PI);
@@ -45,40 +45,22 @@ namespace GalaxySpiralAnimation
             _graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 
-            var scene01Time = CalcSceneTime(0, 10, t);
-            var scene02Time = CalcSceneTime(10, 10, t);
-            var scene03Time = CalcSceneTime(20, 10, t);
-            var scene04Time = CalcSceneTime(30, 10, t);
             var size = (int) (_halfHeight*0.83);
             var rangeR = size - MinR;
-
-            FadeInOutText(0, "Here is an unperturbed galaxy.",ypos:990);
-            FadeInOutText(3, "All the stars go around in more or less a circular orbit.",ypos:990);
-            FadeInOutText(6, "If another galaxy is nearby it can distort those orbits.", ypos: 990);
-            FadeInOutText(10, "The simplest kind of distortion is that they get stretched a bit.", ypos: 990);
-            FadeInOutText(20, "The second thing that can happen is that the orbits can then get pulled around.", ypos: 990, duration:5);
-            FadeInOutText(30, "Just those two things can produce a two arm spiral.", ypos: 990, duration:5);
-            /*
-The stars travelling around on their orbits are essentially undisturbed.
-Sometimes lots of the orbits come quite close together where the spiral arms are.*/
-
-            FadeInOutText(35, "The stars travelling around on their orbits are essentially undisturbed.", ypos: 990, duration: 5);
-            FadeInOutText(40, "Sometimes orbits come close together creating the spiral arms.", ypos: 990, duration: 5);
-
+            
             for (int r = MinR; r < size; r+=StarSpacing)
             {
-                var majorAxis = CalcMajorAxis(r,scene02Time);
+                var majorAxis = CalcMajorAxis(r,10);
 
                 float minorAxis = r;
-                var circumference = Tau*r;
-                var starsPerOrbit = (int)circumference/StarSpacing;
+                var starsPerOrbit = 100;
 
                 var deltaTheta = Tau/starsPerOrbit;
-                var orbitalVelocity = 5*1/Math.Sqrt(r);
+                var orbitalVelocity = 0.13;
 
                 var foo =(double) (size - (r-MinR) - MinR)/rangeR;
-                foo = SCurve(foo, 1);
-                var angle = foo*scene03Time*0.3;
+                //foo = SCurve(foo, 1);
+                var angle = foo*10*0.3;
 
                 for (double theta = 0; theta < Tau; theta+=deltaTheta)
                 {
@@ -96,97 +78,18 @@ Sometimes lots of the orbits come quite close together where the spiral arms are
                 }
             }
 
-            _graphics.DrawString("@kevpluck", new Font("Arial", 16), new SolidBrush(Color.White), 850f, 20f);
+            _graphics.DrawString("@kevpluck", new Font("Arial", 16), new SolidBrush(Color.White), 650f, 20f);
             return bmp;
-        }
-
-        private static double CalcSceneTime(double start, double duration, double t)
-        {
-            if (t < start) return 0;
-
-            var sceneTime = 0d;
-            var end = start + duration;
-
-            if (t < end) sceneTime = t - start;
-            if (t >= end) sceneTime = duration;
-
-            return sceneTime;
         }
 
         private static float CalcMajorAxis(int r, double t)
         {
-            var proportion = SCurve(t, 10);
             var maxR = r*(16f/9f);
             var diffR = maxR - r;
-            return (float) (r + diffR*proportion);
+            return (float) (r + diffR);
         }
-
-        private static double SCurve(double t, double range)
-        {
-            var proportion = 1 - (t/range);
-            var cosArg = proportion*Math.PI;
-            var cosValue = Math.Cos(cosArg);
-            return (1 + cosValue)/2;
-        }
-
-        private void FadeInOutText(int start, string text, int duration = 3, int fontsize = 13, int ypos = 0)
-        {
-            if (NotNow(start, duration)) return;
-
-            var t = _t - start;
-
-            var colour = VidjaEasing.FadeInOutColour(t, duration, Color.FromArgb(255,255,255));
-            var brush = new SolidBrush(colour);
-            var font = new Font("Arial", fontsize);
-
-            var layoutRectangle = new Rectangle((int)(Width * .05), 0, (int)(Width * .9), Height);
-            if (ypos != 0)
-            {
-                var layoutSize = _graphics.MeasureString(text, font);
-                layoutRectangle.Y = ypos/2;
-                layoutRectangle.Height = (int)layoutSize.Height;
-            }
-            else
-                _graphics.FillRectangle(new SolidBrush(Color.FromArgb(colour.A / 2, 255, 255, 255)), 0, 0, Width, Height);
-
-            _graphics.DrawString(text, font, brush, layoutRectangle, _centeredText);
-        }
-
-        private readonly StringFormat _centeredText = new StringFormat
-        {
-            LineAlignment = StringAlignment.Center,
-            Alignment = StringAlignment.Center
-        };
-
-        private bool NotNow(double start, double duration)
-        {
-            return _t < start || _t > start + duration;
-        }
+        
     }
 
-
-
-    internal class VidjaEasing
-    {
-        /// <summary>
-        /// Fades in for .5 sec and fades out .5 sec before duration completes
-        /// </summary>
-        /// <param name="t">0 &lt; t &lt; duration</param>
-        /// <param name="duration">duration &gt; 1</param>
-        public static Color FadeInOutColour(double t, double duration, Color color)
-        {
-            if (t < 0.5)
-            {
-                var alpha = (byte)(255 * t * 2);
-                return Color.FromArgb(alpha, color.R, color.G, color.B);
-            }
-            if (t > duration - 0.5)
-            {
-                var tt = t - duration + 0.5;
-                var alpha = (int)(255 - (255 * tt * 2));
-                return Color.FromArgb(alpha, color.R, color.G, color.B);
-            }
-            return Color.FromArgb(255, color.R, color.G, color.B);
-        }
-    }
+    
 }
