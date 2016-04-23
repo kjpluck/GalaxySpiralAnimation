@@ -11,7 +11,7 @@ namespace GalaxySpiralAnimation
     {
         static void Main(string[] args)
         {
-            Vidja.Vidja.Generate(new GalaxySpiral(),"spiralgalaxy.gif",30);
+            Vidja.Vidja.Generate(new GalaxySpiral(),"spiralgalaxy.gif");
         }
     }
 
@@ -21,7 +21,7 @@ namespace GalaxySpiralAnimation
         public int Width { get; } = 960;
         public int Height { get; } = 540;
         public int Fps { get; } = 25;
-        public double Duration { get; } = 30.96;
+        public double Duration { get; } = 0.96;
 
         private const int StarSpacing = 7;
         private const float Tau = (float) (2*Math.PI);
